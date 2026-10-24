@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#111311">
+    <title>Playframe — Open YouTube links</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #f1efe8;
+        --muted: #aaa99f;
+        --paper: #111311;
+        --card: #1b1e1a;
+        --line: #373a34;
+        --accent: #ff735e;
+        --accent-dark: #e65a45;
+        font-family: "Trebuchet MS", Arial, sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        padding: 32px 20px;
+        display: grid;
+        place-items: center;
+        color: var(--ink);
+        background:
+          radial-gradient(ellipse at 10% 10%, #252821 0, transparent 42%),
+          var(--paper);
+      }
+
+      main { width: min(100%, 620px); }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin-bottom: 35px;
+      }
+
+      .brand-mark {
+        width: 36px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        color: white;
+        background: var(--accent);
+      }
+
+      .brand-name {
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: .13em;
+        text-transform: uppercase;
+      }
+
+      .intro { margin-bottom: 25px; }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--accent-dark);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 520px;
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(38px, 8vw, 58px);
+        font-weight: 500;
+        letter-spacing: -.045em;
+        line-height: 1.02;
+      }
+
+      .intro-copy {
+        max-width: 440px;
+        margin: 14px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .panel {
+        padding: clamp(20px, 5vw, 30px);
+        border: 1px solid var(--line);
+        border-radius: 17px;
+        background: var(--card);
+        box-shadow: 0 15px 45px #00000030;
+      }
+
+      label, .result-label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .input-row, .result-row {
+        display: flex;
+        gap: 10px;
+      }
+
+      input {
+        width: 100%;
+        min-width: 0;
+        padding: 14px 15px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        color: var(--ink);
+        background: #121410;
+        font: inherit;
+      }
+
+      input:focus-visible, button:focus-visible, a:focus-visible {
+        outline: 3px solid #ff735e66;
+        outline-offset: 2px;
+      }
+
+      button, .open-link {
+        display: inline-flex;
+        min-height: 48px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 20px;
+        border: 0;
+        border-radius: 9px;
+        color: white;
+        background: var(--accent);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background .15s ease, transform .15s ease;
+      }
+
+      button:hover, .open-link:hover { background: var(--accent-dark); }
+      button:active, .open-link:active { transform: translateY(1px); }
+
+      .message {
+        min-height: 21px;
+        margin: 10px 0 0;
+        color: var(--accent-dark);
+        font-size: 13px;
+      }
+
+      .result {
+        display: none;
+        margin-top: 22px;
+        padding-top: 22px;
+        border-top: 1px solid var(--line);
+      }
+
+      .result.visible { display: block; }
+
+      .result-row input {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .result-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .secondary {
+        border: 1px solid var(--line);
+        color: var(--ink);
+        background: transparent;
+      }
+
+      .secondary:hover {
+        color: var(--ink);
+        background: #292c26;
+      }
+
+      .how {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-top: 24px;
+      }
+
+      .how-item {
+        padding-top: 13px;
+        border-top: 1px solid var(--line);
+      }
+
+      .how-item strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 12px;
+      }
+
+      .how-item span {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .launch {
+        display: none;
+        padding: 35px 28px;
+        text-align: center;
+      }
+
+      .launch.visible { display: block; }
+      .launch-icon { margin-bottom: 15px; color: var(--accent); }
+      .launch h1 { margin: 0 auto; font-size: clamp(34px, 7vw, 48px); }
+      .launch p { margin: 12px 0 22px; color: var(--muted); line-height: 1.5; }
+      .launch .open-link { min-width: 190px; }
+
+      @media (max-width: 520px) {
+        body { padding: 26px 16px; }
+        .brand { margin-bottom: 27px; }
+        .input-row, .result-row { flex-direction: column; }
+        .input-row button { width: 100%; }
+        .result-actions > * { flex: 1; }
+        .how { grid-template-columns: 1fr; gap: 12px; }
+        .how-item { display: grid; grid-template-columns: 95px 1fr; gap: 10px; }
+        .how-item strong { margin: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="maker">
+      <div class="brand" aria-label="Playframe">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5.5v13l10-6.5z"/>
+          </svg>
+        </span>
+        <span class="brand-name">Playframe</span>
+      </div>
+
+      <header class="intro">
+        <p class="eyebrow">A better way to share</p>
+        <h1>Send a link.<br>Get straight to the video.</h1>
+        <p class="intro-copy">Turn a YouTube URL into a small share link that tries the YouTube app on phones and keeps a web link ready as backup.</p>
+      </header>
+
+      <section class="panel" aria-label="Create a share link">
+        <form id="link-form" novalidate>
+          <label for="video-url">YouTube video URL</label>
+          <div class="input-row">
+            <input id="video-url" name="video-url" type="url" autocomplete="url" placeholder="youtube.com/watch?v=…" required>
+            <button type="submit">Create link</button>
+          </div>
+          <p class="message" id="form-message" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="result" id="result" aria-live="polite">
+          <label class="result-label" for="share-url">Your share link</label>
+          <div class="result-row">
+            <input id="share-url" type="text" readonly>
+            <button class="secondary" id="copy-button" type="button">Copy</button>
+          </div>
+          <div class="result-actions">
+            <a class="open-link" id="preview-link" target="_blank" rel="noopener noreferrer">Try it</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="how" aria-label="How it works">
+        <div class="how-item"><strong>01 · Paste</strong><span>Use a YouTube watch, short, or embed link.</span></div>
+        <div class="how-item"><strong>02 · Share</strong><span>Copy the new link into a message or post.</span></div>
+        <div class="how-item"><strong>03 · Play</strong><span>On phones, it opens the app when available, with a browser fallback.</span></div>
+      </section>
+    </main>
+
+    <main class="panel launch" id="launch" aria-live="polite">
+      <div class="launch-icon" aria-hidden="true">
+        <svg width="42" height="42" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5.5v13l10-6.5z"/>
+        </svg>
+      </div>
+      <h1>Ready to play</h1>
+      <p id="launch-copy">Choose how you’d like to watch this video.</p>
+      <a class="open-link" id="watch-link" target="_blank" rel="noopener noreferrer">Open YouTube</a>
+    </main>
+
+    <script>
+      const videoIdPattern = /^[\w-]{11}$/;
+      const form = document.getElementById("link-form");
+      const urlInput = document.getElementById("video-url");
+      const message = document.getElementById("form-message");
+      const result = document.getElementById("result");
+      const shareUrlInput = document.getElementById("share-url");
+      const copyButton = document.getElementById("copy-button");
+      const previewLink = document.getElementById("preview-link");
+
+      function getVideoId(rawUrl) {
+        let url;
+        try {
+          url = new URL(rawUrl);
+        } catch {
+          try {
+            url = new URL(`https://${rawUrl}`);
+          } catch {
+            return null;
+          }
+        }
+
+        const host = url.hostname.toLowerCase().replace(/^www\./, "");
+        if (host === "youtu.be") {
+          return url.pathname.split("/").filter(Boolean)[0] ?? null;
+        }
+        if (host !== "youtube.com" && host !== "m.youtube.com") return null;
+
+        if (url.pathname === "/watch") return url.searchParams.get("v");
+        const match = url.pathname.match(/^\/(?:embed|shorts|live)\/([^/]+)/);
+        return match?.[1] ?? null;
+      }
+
+      function makeShareUrl(videoId) {
+        const url = new URL(window.location.href);
+        url.search = "";
+        url.hash = "";
+        url.searchParams.set("video", videoId);
+        return url.toString();
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const videoId = getVideoId(urlInput.value.trim());
+        if (!videoId || !videoIdPattern.test(videoId)) {
+          result.classList.remove("visible");
+          message.textContent = "That doesn’t look like a supported YouTube video URL.";
+          return;
+        }
+
+        const shareUrl = makeShareUrl(videoId);
+        message.textContent = "";
+        shareUrlInput.value = shareUrl;
+        previewLink.href = shareUrl;
+        result.classList.add("visible");
+        copyButton.textContent = "Copy";
+      });
+
+      copyButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(shareUrlInput.value);
+          copyButton.textContent = "Copied";
+          message.textContent = "Link copied to clipboard.";
+        } catch (error) {
+          shareUrlInput.focus();
+          shareUrlInput.select();
+          message.textContent = "Clipboard access is unavailable. Select and copy the link above.";
+        }
+      });
+
+      function openVideo(videoId) {
+        const watchUrl = `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
+        const maker = document.getElementById("maker");
+        const launch = document.getElementById("launch");
+        const watchLink = document.getElementById("watch-link");
+        maker.hidden = true;
+        launch.classList.add("visible");
+        watchLink.href = watchUrl;
+
+        const agent = navigator.userAgent;
+        if (/iPhone|iPad|iPod/i.test(agent)) {
+          window.location.href = `youtube://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
+          const fallback = window.setTimeout(() => {
+            if (!document.hidden) window.location.href = watchUrl;
+          }, 1800);
+          const cancelFallback = () => {
+            if (document.hidden) window.clearTimeout(fallback);
+          };
+          document.addEventListener("visibilitychange", cancelFallback);
+          window.addEventListener("pagehide", () => window.clearTimeout(fallback), { once: true });
+        } else if (/Android/i.test(agent)) {
+          const intent = `intent://www.youtube.com/watch?v=${encodeURIComponent(videoId)}#Intent;scheme=https;package=com.google.android.youtube;S.browser_fallback_url=${encodeURIComponent(watchUrl)};end`;
+          window.location.href = intent;
+        }
+      }
+
+      const sharedVideoId = new URLSearchParams(window.location.search).get("video");
+      if (sharedVideoId && videoIdPattern.test(sharedVideoId)) openVideo(sharedVideoId);
+    </script>
+  </body>
+</html>
